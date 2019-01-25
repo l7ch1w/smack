@@ -1,5 +1,6 @@
 package com.snackchat.l7ch1w.smack
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
@@ -34,7 +35,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun loginBtnNavClicked (view: View) {
-
+        val LoginIntent = Intent (this, LoginActivity ::class.java)
+        startActivity(LoginIntent)
     }
 
     fun addChannelClicked (view: View) {
