@@ -1,23 +1,80 @@
-package com.snackchat.l7ch1w.smack
+package com.snackchat.l7ch1w.smack.Controller
 
+import android.content.Context
 import android.content.Intent
+import android.hardware.input.InputManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import com.snackchat.l7ch1w.smack.R
+import com.snackchat.l7ch1w.smack.Services.Authservices
+import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        loginSpinner.visibility = View.INVISIBLE
     }
 
     fun loginLoginBtnClicked (view: View) {
+        enableSpinner(true)
+        val email = loginEmailText.text.toString()
+        val password = loginPasswordTxt.text.toString()
+        hideKeyboard()
+        if (email.isNotEmpty() && password.isNotEmpty()){
+            Authservices.loginUser(this,email,password){ loginSuccess ->
+                if(loginSuccess){
+                    Authservices.findUserByEmail(this){findSuccess ->
+                        if (findSuccess){
+                            enableSpinner(false)
+                            finish()
+                        } else {
+                            errorToast()
+                        }
+                    }
+                } else {
+                    errorToast()
+                }
+            }
+        } else {
+            Toast.makeText(this,"Please fill in both email and password!",
+                    Toast.LENGTH_LONG).show()
+        }
+
 
     }
 
     fun loginCreateUserBtnClicked (view: View){
-        val SignUpIntent = Intent (this,SignUp ::class.java)
+        val SignUpIntent = Intent (this, SignUp::class.java)
         startActivity(SignUpIntent)
+        finish()
+    }
+
+    fun errorToast(){
+        Toast.makeText(this,"Something went wrong, please try again",
+                Toast.LENGTH_LONG).show()
+        enableSpinner(false)
+    }
+
+    fun enableSpinner(enable:Boolean){
+        if (enable) {
+            loginSpinner.visibility = View.VISIBLE
+        } else {
+            loginSpinner.visibility = View.INVISIBLE
+        }
+        loginLoginBtn.isEnabled = !enable
+        loginCreateUserBtn.isEnabled = !enable
+    }
+
+    fun hideKeyboard(){
+        val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        if (inputManager.isAcceptingText){
+            inputManager.hideSoftInputFromWindow(currentFocus.windowToken, 0)
+        }
     }
 }
